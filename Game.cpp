@@ -174,13 +174,7 @@ void Game::UpdateGame()
 		mBallVel.x *= -1.0f;
 	}
 
-	//Verifica se a bola saiu da tela (no lado esquerdo, onde é permitido)
-	//Se sim, encerra o jogo
-	// 
-	else if (mBallPos.x <= 0.0f)
-	{
-		mIsRunning = false;
-	}
+	
 
 	// Atualize (negative) a velocidade da bola se ela colidir com a parede do lado direito
 	// 
