@@ -68,7 +68,7 @@ bool Game::Initialize()
 	mBallVel.y = 500.0f;//velocidade de movimentação da bola no eixo y
 	bola2Pos.x = 1024.0f / 2.0f; //posição da bola 2 eixo x
 	bola2Pos.y = 768.0f / 4.0f; //posição da bola 2 eixo y
-	bola2Vel.x = 200.0f; //velocidade de movimentação da bola 2 no eixo x
+	bola2Vel.x = 200.0f; //velocidade de movimentação da bola 2 no eixo xb
 	bola2Vel.y = 500.0f; //velocidade de movimentação da bola 2 no eixo y
 
 	return true;
@@ -156,13 +156,17 @@ void Game::UpdateGame()
 	// atualiza a posição da bola com base na sua velocidade
 	mBallPos.x += mBallVel.x * deltaTime;
 	mBallPos.y += mBallVel.y * deltaTime;
+	bola2Pos.x += bola2Vel.x * deltaTime;
+	bola2Pos.y += bola2Vel.y * deltaTime;
 	
 	// atualiza a posição da bola se ela colidiu com a raquete
 	float diff = mPaddlePos.y - mBallPos.y;
+	float diff2 = mPaddlePos.y - bola2Pos.y;
 	//pegue o valor absoluto de diferença entre o eixo y da bolinha e da raquete
 	//isso é necessário para os casos em que no próximo frame a bolinha ainda não esteja tão distante da raquete
 	//verifica se a bola está na area da raquete e na mesma posição no eixo x
 	diff = (diff > 0.0f) ? diff : -diff;
+	diff2 = (diff2 > 0.0f) ? diff2 : -diff2;
 	if (
 		// A diferença no eixo y y-difference is small enough
 		diff <= paddleH / 2.0f &&
@@ -173,7 +177,10 @@ void Game::UpdateGame()
 	{
 		mBallVel.x *= -1.0f;
 	}
-
+	if (diff2 <= paddleH / 2.0f && bola2Pos.x <= 25.0f && bola2Pos.x >= 20.0f && bola2Vel.x < 0.0f)
+	{
+		bola2Vel.x *= -1.0f;
+	}
 	
 
 	// Atualize (negative) a velocidade da bola se ela colidir com a parede do lado direito
@@ -182,20 +189,36 @@ void Game::UpdateGame()
 	{
 		mBallVel.x *= -1.0f;
 	}
+
+	else if (bola2Pos.x >= (1024.0f - thickness) && bola2Vel.x > 0.0f)
+	{
+		bola2Vel.x *= -1.0f;
+	}
 	
-	// Atualize (negative) a posição da bola se ela colidir com a parede de cima
+	// Atualize (negative) a posição das bolas se ela colidir com a parede de cima
 	// 
 	if (mBallPos.y <= thickness && mBallVel.y < 0.0f)
 	{
 		mBallVel.y *= -1;
 	}
 
-	// Atualize (negative) a posição da bola se ela colidiu com a parede de baixo
+	if (bola2Pos.y <= thickness && bola2Vel.y < 0.0f)
+	{
+		bola2Vel.y *= -1;
+	}
+
+	// Atualize (negative) a posição das bolas se ela colidiu com a parede de baixo
 	// Did the ball collide with the bottom wall?
 	else if (mBallPos.y >= (768 - thickness) &&
 		mBallVel.y > 0.0f)
 	{
 		mBallVel.y *= -1;
+	}
+
+	else if (bola2Pos.y >= (768 - thickness) &&
+		bola2Vel.y > 0.0f)
+	{
+		bola2Vel.y *= -1;
 	}
 
 	
@@ -276,7 +299,15 @@ void Game::GenerateOutput()
 	};
 	SDL_RenderFillRect(mRenderer, &ball);
 
-	SDL_SetRenderDrawColor(mRenderer, 255, 255, 0, 255);	
+	SDL_SetRenderDrawColor(mRenderer, 255, 255, 0, 255);
+	SDL_Rect ball2{
+		static_cast<int>(bola2Pos.x - thickness / 2),
+		static_cast<int>(bola2Pos.y - thickness / 2),
+		thickness,
+		thickness
+	};
+	SDL_RenderFillRect(mRenderer, &ball2);
+
 
 	
 	// Swap front buffer and back buffer
